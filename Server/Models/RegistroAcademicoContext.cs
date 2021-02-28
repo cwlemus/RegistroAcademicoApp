@@ -1,0 +1,121 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+
+namespace RegistroAcademicoApp.Server.Models
+{
+    public partial class RegistroAcademicoContext : DbContext
+    {
+        public RegistroAcademicoContext()
+        {
+        }
+
+        public RegistroAcademicoContext(DbContextOptions<RegistroAcademicoContext> options)
+            : base(options)
+        {
+        }
+
+        public virtual DbSet<Cursos> Cursos { get; set; }
+        public virtual DbSet<DireccionEstudiantes> DireccionEstudiantes { get; set; }
+        public virtual DbSet<Estudiante> Estudiante { get; set; }
+        public virtual DbSet<Facultad> Facultad { get; set; }
+        public virtual DbSet<Grado> Grado { get; set; }
+        public virtual DbSet<Maestros> Maestros { get; set; }
+        public virtual DbSet<Seccion> Seccion { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+                optionsBuilder.UseSqlServer("server=LAPTOP-74AJBVCC\\SQLEXPRESS;database=RegistroAcademico; Integrated Security=true");
+            }
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Cursos>(entity =>
+            {
+                entity.HasKey(e => e.CursoId);
+
+                entity.HasIndex(e => e.OnLineMaestrosId);
+
+                entity.HasIndex(e => e.PresencialMaestrosId);
+
+                entity.Property(e => e.OnLineMaestrosId).HasColumnName("onLineMaestrosId");
+
+                entity.Property(e => e.PresencialMaestrosId).HasColumnName("presencialMaestrosID");
+
+                entity.HasOne(d => d.OnLineMaestros)
+                    .WithMany(p => p.CursosOnLineMaestros)
+                    .HasForeignKey(d => d.OnLineMaestrosId);
+
+                entity.HasOne(d => d.PresencialMaestros)
+                    .WithMany(p => p.CursosPresencialMaestros)
+                    .HasForeignKey(d => d.PresencialMaestrosId);
+            });
+
+            modelBuilder.Entity<DireccionEstudiantes>(entity =>
+            {
+                entity.HasKey(e => e.IdDireccionEstudiante);
+
+                entity.HasIndex(e => e.EstudianteIdEstudiante);
+
+                entity.HasOne(d => d.EstudianteIdEstudianteNavigation)
+                    .WithMany(p => p.DireccionEstudiantes)
+                    .HasForeignKey(d => d.EstudianteIdEstudiante);
+            });
+
+            modelBuilder.Entity<Estudiante>(entity =>
+            {
+                entity.HasKey(e => e.IdEstudiante);
+
+                entity.HasIndex(e => e.CursosCursoId);
+
+                entity.HasIndex(e => e.FacultadRefId);
+
+                entity.HasIndex(e => e.GradoId);
+
+                entity.Property(e => e.Altura).HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.Nombre)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.RowVersion)
+                    .IsRowVersion()
+                    .IsConcurrencyToken();
+
+                entity.HasOne(d => d.CursosCurso)
+                    .WithMany(p => p.Estudiante)
+                    .HasForeignKey(d => d.CursosCursoId);
+
+                entity.HasOne(d => d.FacultadRef)
+                    .WithMany(p => p.Estudiante)
+                    .HasForeignKey(d => d.FacultadRefId);
+
+                entity.HasOne(d => d.Grado)
+                    .WithMany(p => p.Estudiante)
+                    .HasForeignKey(d => d.GradoId);
+            });
+
+            modelBuilder.Entity<Maestros>(entity =>
+            {
+                entity.HasKey(e => e.MaestroId);
+            });
+
+            modelBuilder.Entity<Seccion>(entity =>
+            {
+                entity.HasKey(e => e.IdSeccion);
+
+                entity.Property(e => e.Nombre)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+            });
+
+            OnModelCreatingPartial(modelBuilder);
+        }
+
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+    }
+}
