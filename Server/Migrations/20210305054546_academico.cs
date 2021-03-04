@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace RegistroAcademicoApp.Server.Migrations
 {
-    public partial class AcadRegEstudiantes : Migration
+    public partial class academico : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -67,6 +67,7 @@ namespace RegistroAcademicoApp.Server.Migrations
                     IdCuposCurso = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Cupo = table.Column<int>(nullable: false),
+                    Year = table.Column<int>(nullable: false),
                     RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
                     CursosId = table.Column<int>(nullable: true)
                 },
@@ -181,6 +182,7 @@ namespace RegistroAcademicoApp.Server.Migrations
                     Descripcion = table.Column<string>(nullable: true),
                     onLineMaestrosId = table.Column<int>(nullable: true),
                     presencialMaestrosID = table.Column<int>(nullable: true),
+                    CurposCursoId = table.Column<int>(nullable: true),
                     DetRegistroAcademicoDetRegistroIdAcad = table.Column<int>(nullable: true)
                 },
                 constraints: table =>

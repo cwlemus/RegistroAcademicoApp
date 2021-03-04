@@ -10,8 +10,8 @@ using RegistroAcademicoApp.Server.Models;
 namespace RegistroAcademicoApp.Server.Migrations
 {
     [DbContext(typeof(RegistroAcademicoContext))]
-    [Migration("20210304063320_AcadRegEstudiantes")]
-    partial class AcadRegEstudiantes
+    [Migration("20210305054546_academico")]
+    partial class academico
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -39,6 +39,9 @@ namespace RegistroAcademicoApp.Server.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
                     b.HasKey("IdCuposCurso");
 
                     b.HasIndex("CursosId");
@@ -52,6 +55,9 @@ namespace RegistroAcademicoApp.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int?>("CurposCursoId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Descripcion")
                         .HasColumnType("nvarchar(max)");
@@ -267,7 +273,7 @@ namespace RegistroAcademicoApp.Server.Migrations
             modelBuilder.Entity("RegistroAcademicoApp.Server.Models.CuposCursos", b =>
                 {
                     b.HasOne("RegistroAcademicoApp.Server.Models.Cursos", "CursosCupo")
-                        .WithMany()
+                        .WithMany("CuposCurso")
                         .HasForeignKey("CursosId");
                 });
 

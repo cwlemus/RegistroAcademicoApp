@@ -15,7 +15,7 @@ namespace RegistroAcademicoApp.Server.Models
 
         public int? CursosId { get; set; }
         public int? EncRegistroAcademicoId { get; set; }
-        public virtual ICollection<Cursos> CursosEstudiante { get; set; }
+        public virtual Cursos CursoEstudiante { get; set; }
         public virtual EncRegistroAcademico EncRegroAcademicoEnc { get; set; }
     }
 }

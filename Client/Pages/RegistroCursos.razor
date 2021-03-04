@@ -2,8 +2,22 @@
 @using RegistroAcademicoApp.Shared
 @inject HttpClient http
 @using Blazored.Typeahead
+@inject HttpClient http
+@inject IRepositorio repositorio
+@inject NavigationManager navigationManager
 <div>
-    <form>
+    <div class="alert @tipoMsg">
+        @msg
+    </div>
+    <form @onsubmit="GuardarDatos">
+        <BlazoredTypeahead SearchMethod="buscarEstudiante" @bind-Value="EstudianteSelected" EnableDropDown="true" TItem="EstudiantesCls" TValue="EstudiantesCls">
+            <SelectedTemplate>
+               @context.IdEstudiante - @context.Nombre
+            </SelectedTemplate>
+            <ResultTemplate>
+                @context.IdEstudiante - @context.Nombre
+            </ResultTemplate>
+        </BlazoredTypeahead>
         <label>Maestros</label>
         <div class="form-group">
             <label>Docente</label>
@@ -33,29 +47,31 @@
                 }
             </select>
         </div>
-        
 
-      
-            <BlazoredTypeahead MaximumSuggestions="2"  SearchMethod="buscarCursos" @bind-Value="CursoSelected" EnableDropDown="true" TItem="CursoCls" TValue="CursoCls">
-                <SelectedTemplate>
-                   @context.NombreCurso
-                </SelectedTemplate>
-                <ResultTemplate>
-                    @context.NombreCurso
-                </ResultTemplate>
-            </BlazoredTypeahead>
-            <div class="form-group">
-                @if (CursoSelected != null)
-                {
-                    <p>Curso Seleccionado: @CursoSelected.NombreCurso</p>
-                }
-            </div>
+
+        <BlazoredTypeahead MaximumSuggestions="2" SearchMethod="buscarCursos" @bind-Value="CursoSelected" EnableDropDown="true" TItem="CursoCls" TValue="CursoCls">
+            <SelectedTemplate>
+                @context.NombreCurso - Cupos: @context.Cupo
+            </SelectedTemplate>
+            <ResultTemplate>                
+                @context.NombreCurso - Cupos: @context.Cupo
+            </ResultTemplate>
+        </BlazoredTypeahead>
+
+        
+        <div class="form-group">
+            <input type="submit" class="btn btn-primary" value="Agregar" />
+            @if (CursoSelected != null)
+            {
+                <p>Curso Seleccionado: @CursoSelected.NombreCurso</p>
+            }
+        </div>
     </form>
 </div>
 @code{
     protected override async Task OnInitializedAsync()
     {
         LstMaestros = await http.GetFromJsonAsync<MaestrosCls[]>("api/Maestro/GetMaestros");
-
+        LstEstudiantes = await http.GetFromJsonAsync<EstudiantesCls[]>("api/Estudiante/GetEstudiantes");
     }
 }

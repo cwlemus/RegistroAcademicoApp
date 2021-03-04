@@ -5,22 +5,17 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace RegistroAcademicoApp.Server.Models
+namespace RegistroAcademicoApp.Shared
 {
-    public class CuposCursos
+    public class CuposCursosCls
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        
         public int IdCuposCurso { get; set; }
-
-        [DataType(DataType.Currency)]
+        
         public int Cupo { get; set; }
         public int Year { get; set; }
 
-        [Timestamp]
-        public byte[] RowVersion { get; set; }
-
         public int? CursosId { get; set; }
-        public Cursos CursosCupo { get; set; }
+        public CursoCls CursosCupo { get; set; }
     }
 }
