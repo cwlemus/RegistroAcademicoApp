@@ -10,15 +10,16 @@
         @msg
     </div>
     <form @onsubmit="GuardarDatos">
+        <label>Estudiantes</label>
         <BlazoredTypeahead SearchMethod="buscarEstudiante" @bind-Value="EstudianteSelected" EnableDropDown="true" TItem="EstudiantesCls" TValue="EstudiantesCls">
             <SelectedTemplate>
-               @context.IdEstudiante - @context.Nombre
+                @context.IdEstudiante - @context.Nombre
             </SelectedTemplate>
             <ResultTemplate>
                 @context.IdEstudiante - @context.Nombre
             </ResultTemplate>
         </BlazoredTypeahead>
-        <label>Maestros</label>
+
         <div class="form-group">
             <label>Docente</label>
             <select class="form-control" @bind-value="cbxMaestro"
@@ -53,19 +54,29 @@
             <SelectedTemplate>
                 @context.NombreCurso - Cupos: @context.Cupo
             </SelectedTemplate>
-            <ResultTemplate>                
+            <ResultTemplate>
                 @context.NombreCurso - Cupos: @context.Cupo
             </ResultTemplate>
         </BlazoredTypeahead>
 
-        
+
         <div class="form-group">
-            <input type="submit" class="btn btn-primary" value="Agregar" />
-            @if (CursoSelected != null)
-            {
-                <p>Curso Seleccionado: @CursoSelected.NombreCurso</p>
-            }
+            <input type="submit" class="m-3 btn btn-primary" value="Agregar" />
         </div>
+
+        @code{
+            string[] cabecerasTabla = { "Codigo", "Nombre Curso", "Maestro", "Opciones" };
+        }
+        <div class="form-group">
+            <Lista cabeceras=cabecerasTabla
+                   lista=DetalleRegistro
+                   eventEliminar="EliminarDatos"
+                   eventBusqueda="BusquedaGrado"
+                   rtaAgregar="agregarGrado"
+                   rtaEditar="editarGrado"
+                   MostrarEspera="false" />
+        </div>
+
     </form>
 </div>
 @code{
@@ -73,5 +84,28 @@
     {
         LstMaestros = await http.GetFromJsonAsync<MaestrosCls[]>("api/Maestro/GetMaestros");
         LstEstudiantes = await http.GetFromJsonAsync<EstudiantesCls[]>("api/Estudiante/GetEstudiantes");
+    }
+    public async Task BusquedaGrado(string data)
+    {
+        tipoMsg = ""; msg = "";
+        DetalleRegistro = await http.GetFromJsonAsync<MostrarCursos[]>("api/RegistroAcademico/Filtrar/" + data);
+
+    }
+
+    public async Task EliminarDatos(string data)
+    {
+        int respuesta = await http.GetFromJsonAsync<int>("api/Grado/EliminarGrado/" + data);
+        if (respuesta == 1)
+        {
+            data = "";
+            //listaGrados = await http.GetFromJsonAsync<GradoCls[]>("api/RegistroAcademico/Filtrar/" + data);
+            tipoMsg = "alert alert-primary";
+            msg = "Grado eliminado con exito";
+        }
+        else
+        {
+            tipoMsg = "alert alert-danger";
+            msg = "Accion no pudo procesarse, es posible que el Grado ya cuente con registros";
+        }
     }
 }

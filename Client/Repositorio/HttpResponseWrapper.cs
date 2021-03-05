@@ -15,6 +15,12 @@ namespace RegistroAcademicoApp.Client.Repositorio
             HttpResponseMessage = httResponseMessage;
         }
 
+        public HttpResponseWrapper(T response,bool erro)
+        {
+            Response = response;
+            Error = erro;
+        }
+
         public bool Error { get; set; }
         public T Response { get; set; }
 

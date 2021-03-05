@@ -15,16 +15,17 @@ namespace RegistroAcademicoApp.Client.Pages
         private CursoCls CursoSelected;
         private EstudiantesCls EstudianteSelected;
         public MaestrosCls[] LstMaestros { get; set; } = null;
+        public MostrarCursos[] DetalleRegistro { get; set; }
         public List<CursoCls> LstCursos { get; set; } = null;
         public EstudiantesCls[] LstEstudiantes { get; set; }
-
+        MaestrosCls maestroSelected = new MaestrosCls();
+        List<MostrarCursos> lstAux = new List<MostrarCursos>();
         public EncRegistroAcademicoCls encRegistroCls { get; set; }
 
 
         public void BuscarCursoPorMaestro()
         {
-            LstCursos = null;
-            MaestrosCls maestroSelected = new MaestrosCls();
+            LstCursos = null;            
             maestroSelected = LstMaestros.Where(c => c.MaestroId == cbxMaestro).First();
             //LstCursos = maestroSelected.CursosPresencialMaestros;
             LstCursos = (from c in maestroSelected.CursosPresencialMaestros
@@ -64,13 +65,14 @@ namespace RegistroAcademicoApp.Client.Pages
         public async Task GuardarDatos()
         {
             encRegistroCls = new EncRegistroAcademicoCls();
-            
+            encRegistroCls.DetRegistroAcademicosDet = new List<DetRegistroAcademicoCls>();
             encRegistroCls.EstudianteReg = EstudianteSelected;
-            encRegistroCls.DetRegistroAcademicosDet=new List<DetRegistroAcademicoCls>();
+            encRegistroCls.DetRegistroAcademicosDet=new List<DetRegistroAcademicoCls>();            
             DetRegistroAcademicoCls dt = new DetRegistroAcademicoCls();            
             dt.CursoEstudiante= CursoSelected;
             dt.CursosId = CursoSelected.CursoId;
             encRegistroCls.DetRegistroAcademicosDet.Add(dt);
+                        
             var response = await repositorio.Post("api/RegistroAcad/Guardar", encRegistroCls);
             if (response.Error)
             {
@@ -84,9 +86,23 @@ namespace RegistroAcademicoApp.Client.Pages
                 tipoMsg = "alert-primary";
                 msg = "Se guardo factura con exito ....";
                 Console.WriteLine("Guardado exitoso...");
+                // Agregamos curso
+                lstAux.Add(
+                    new MostrarCursos()
+                    {
+                        Codigo = dt.CursoEstudiante.CursoId,
+                        NombreCurso = dt.CursoEstudiante.NombreCurso,
+                        Maestro = maestroSelected.Nombre
+                    }
+                );
+                DetalleRegistro = lstAux.ToArray();
+                LstCursos = new List<CursoCls>();                
+                maestroSelected = null;
+               
             }
 
         }
+       
 
 
     }

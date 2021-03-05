@@ -7,11 +7,16 @@
 }
 else
 {
-    <div class="form-group">
-        <NavLink href="@rtaAgregar">
-            <button class="btn btn-primary">Agregar</button>
-        </NavLink>
-    </div>
+
+
+    @if (AgregarOpt)
+    {
+        <div class="form-group">
+            <NavLink href="@rtaAgregar">
+                <button class="btn btn-primary">Agregar</button>
+            </NavLink>
+        </div>
+    }
     <div class="mb-4">
         <label class="form-group">Buscar</label>
         <input type="text" class="form-check form-control"
@@ -40,16 +45,14 @@ else
                         <button class="btn btn-danger fa fa-trash"
                                 data-toggle="modal" data-target="#dlgEliminar"
                                 @onclick="@(()=>OptEliminar(@obj.GetType().GetProperties()[0].GetValue(@obj).ToString()))">
-                            
                         </button>
 
-
+                        @if (EditarOpt) { 
 
                         <button class="btn btn-info fa fa-edit"
                                 @onclick="@(()=>OptEditar(@obj.GetType().GetProperties()[0].GetValue(@obj).ToString()))">
-                            
                         </button>
-
+                        }
 
                     </td>
 
@@ -68,7 +71,16 @@ else
     public string valorEditar { get; set; }
 
     [Parameter]
+    public bool MostrarEspera { get; set; }
+
+    [Parameter]
     public String rtaAgregar { get; set; } = " ";
+
+    [Parameter]
+    public bool EditarOpt { get; set; }
+
+    [Parameter]
+    public bool AgregarOpt { get; set; }
 
     [Parameter]
     public String rtaEditar { get; set; } = " ";
