@@ -54,14 +54,8 @@ namespace RegistroAcademicoApp.Server.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("CurposCursoId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Descripcion")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("DetRegistroAcademicoDetRegistroIdAcad")
-                        .HasColumnType("int");
 
                     b.Property<string>("NombreCurso")
                         .HasColumnType("nvarchar(max)");
@@ -75,8 +69,6 @@ namespace RegistroAcademicoApp.Server.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("CursoId");
-
-                    b.HasIndex("DetRegistroAcademicoDetRegistroIdAcad");
 
                     b.HasIndex("OnLineMaestrosId");
 
@@ -99,6 +91,8 @@ namespace RegistroAcademicoApp.Server.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("DetRegistroIdAcad");
+
+                    b.HasIndex("CursosId");
 
                     b.HasIndex("EncRegistroAcademicoId");
 
@@ -251,6 +245,26 @@ namespace RegistroAcademicoApp.Server.Migrations
                     b.ToTable("Maestros");
                 });
 
+            modelBuilder.Entity("RegistroAcademicoApp.Server.Models.Perfil", b =>
+                {
+                    b.Property<int>("IdPerfil")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("OpcionMenu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("IdPerfil");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("Perfiles");
+                });
+
             modelBuilder.Entity("RegistroAcademicoApp.Server.Models.Seccion", b =>
                 {
                     b.Property<int>("IdSeccion")
@@ -268,6 +282,24 @@ namespace RegistroAcademicoApp.Server.Migrations
                     b.ToTable("Seccion");
                 });
 
+            modelBuilder.Entity("RegistroAcademicoApp.Server.Models.Usuario", b =>
+                {
+                    b.Property<int>("idUsuario")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("nombre")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("pass")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("idUsuario");
+
+                    b.ToTable("Usuarios");
+                });
+
             modelBuilder.Entity("RegistroAcademicoApp.Server.Models.CuposCursos", b =>
                 {
                     b.HasOne("RegistroAcademicoApp.Server.Models.Cursos", "CursosCupo")
@@ -277,10 +309,6 @@ namespace RegistroAcademicoApp.Server.Migrations
 
             modelBuilder.Entity("RegistroAcademicoApp.Server.Models.Cursos", b =>
                 {
-                    b.HasOne("RegistroAcademicoApp.Server.Models.DetRegistroAcademico", null)
-                        .WithMany("CursosEstudiante")
-                        .HasForeignKey("DetRegistroAcademicoDetRegistroIdAcad");
-
                     b.HasOne("RegistroAcademicoApp.Server.Models.Maestros", "OnLineMaestros")
                         .WithMany("CursosOnLineMaestros")
                         .HasForeignKey("OnLineMaestrosId");
@@ -292,6 +320,10 @@ namespace RegistroAcademicoApp.Server.Migrations
 
             modelBuilder.Entity("RegistroAcademicoApp.Server.Models.DetRegistroAcademico", b =>
                 {
+                    b.HasOne("RegistroAcademicoApp.Server.Models.Cursos", "CursoEstudiante")
+                        .WithMany()
+                        .HasForeignKey("CursosId");
+
                     b.HasOne("RegistroAcademicoApp.Server.Models.EncRegistroAcademico", "EncRegroAcademicoEnc")
                         .WithMany("DetRegistroAcademicosDet")
                         .HasForeignKey("EncRegistroAcademicoId");
@@ -328,6 +360,13 @@ namespace RegistroAcademicoApp.Server.Migrations
                         .HasForeignKey("GradoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("RegistroAcademicoApp.Server.Models.Perfil", b =>
+                {
+                    b.HasOne("RegistroAcademicoApp.Server.Models.Usuario", "UsuarioPerfil")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId");
                 });
 #pragma warning restore 612, 618
         }

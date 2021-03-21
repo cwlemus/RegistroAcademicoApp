@@ -3,7 +3,10 @@
 
 @if (lista == null)
 {
-    <h1>Cargando....</h1>
+    @if (MostrarEspera)
+    {
+        <h1>Cargando....</h1>
+    }
 }
 else
 {
@@ -47,11 +50,12 @@ else
                                 @onclick="@(()=>OptEliminar(@obj.GetType().GetProperties()[0].GetValue(@obj).ToString()))">
                         </button>
 
-                        @if (EditarOpt) { 
+                        @if (EditarOpt)
+                        {
 
-                        <button class="btn btn-info fa fa-edit"
-                                @onclick="@(()=>OptEditar(@obj.GetType().GetProperties()[0].GetValue(@obj).ToString()))">
-                        </button>
+                            <button class="btn btn-info fa fa-edit"
+                                    @onclick="@(()=>OptEditar(@obj.GetType().GetProperties()[0].GetValue(@obj).ToString()))">
+                            </button>
                         }
 
                     </td>

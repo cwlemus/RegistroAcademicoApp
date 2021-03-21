@@ -1,30 +1,50 @@
 ﻿@page "/ListaGrados"
+@using Microsoft.AspNetCore.Components.Authorization
 @using RegistroAcademicoApp.Shared
 @inject HttpClient http
-
-
-@code{
-    string[] cabecerasTabla = { "Codigo", "Grado", "Seccion", "Opciones" };
-}
-<div class="@tipoMsg">
-    @msg
-</div>
-<Lista cabeceras=cabecerasTabla
-       lista=listaGrados
-       eventEliminar="EliminarDatos"
-       eventBusqueda="BusquedaGrado"
-       rtaAgregar="agregarGrado"
-       rtaEditar="editarGrado"
-       EditarOpt="true"
-       AgregarOpt="true"
-       MostrarEspera="true"/>
-
+<AuthorizeView>
+    <Authorized>
+        <h3 style="color: cornflowerblue">@message</h3>
+        @code{
+            string[] cabecerasTabla = { "Codigo", "Grado", "Seccion", "Opciones" };
+        }
+        <div class="@tipoMsg">
+            @msg
+        </div>
+        <Lista cabeceras=cabecerasTabla
+               lista=listaGrados
+               eventEliminar="EliminarDatos"
+               eventBusqueda="BusquedaGrado"
+               rtaAgregar="agregarGrado"
+               rtaEditar="editarGrado"
+               EditarOpt="true"
+               AgregarOpt="true"
+               MostrarEspera="true" />
+    </Authorized>
+    <NotAuthorized>
+        <h3 style="color:red">@message</h3>
+    </NotAuthorized>
+</AuthorizeView>
 @code {
-    private string tipoMsg = "", msg = "";
-    private GradoCls[] listaGrados;
+    [CascadingParameter]
+    private Task<AuthenticationState> auth { get; set; }
 
+    private string tipoMsg = "", msg = "", message = "";
+    private GradoCls[] listaGrados;
     protected override async Task OnInitializedAsync()
     {
+        var authuser = await auth;
+       
+            var user = authuser.User;
+
+            if (user.Identity.IsAuthenticated)
+            {
+                message = "Bienvenido " + user.Identity.Name;
+            }
+            else
+            {
+                message = "No esta autenticado";
+            }
         listaGrados = await http.GetFromJsonAsync<GradoCls[]>("api/Grados/Get");
     }
 
