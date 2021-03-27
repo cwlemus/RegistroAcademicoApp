@@ -15,11 +15,18 @@
         </div>
     }
 
-    <div class="form-group">
-        <label>Opcion</label>
-        <InputText class="form-check form-control"
-                   @bind-Value="perfilCls.OpcionMenu" />
-    </div>
+<div class="form-group">
+    <label>Opcion</label>    
+    <BlazoredTypeahead SearchMethod="buscarMenu" @bind-Value="perfilCls.UsuarioIdMenuNavigation" EnableDropDown="true" TItem="MenuCls" TValue="MenuCls">
+        <SelectedTemplate Context="ctex">
+            @ctex.IdMenu - @ctex.OpcionMenu
+        </SelectedTemplate>
+        <ResultTemplate Context="ctx">
+            @ctx.IdMenu - @ctx.OpcionMenu
+        </ResultTemplate>
+    </BlazoredTypeahead>
+
+</div>
 
     <div class="form-group">
         <label>Usuario</label>
@@ -44,14 +51,30 @@
     public PerfilCls perfilCls { get; set; } = new PerfilCls();
 
     public UsuarioCls[] lstUsuarios;
+    public MenuCls[] lstMenus;
     //public UsuarioCls UsuarioSelected;
 
 
     protected override async Task OnInitializedAsync()
     {
         lstUsuarios= await http.GetFromJsonAsync<UsuarioCls[]>("api/Usuario/Get");
-        
 
+        List<MenuCls> lst = new List<MenuCls>()
+        {
+            new MenuCls()
+            {
+                Icono="n/a",
+                 NombreMenu= "Registro Cursos",
+                 OpcionMenu= "RegistroCurso"
+            },
+            new MenuCls()
+            {
+                Icono="n/a",
+                 NombreMenu= "Registro Cursos",
+                 OpcionMenu= "RegistroCurso"
+            }
+        };
+        lstMenus = lst.ToArray();
     }
 
 
@@ -73,6 +96,18 @@
 
 
 
+    }
+
+    private async Task<IEnumerable<MenuCls>> buscarMenu(string seachText)
+    {
+        if (!seachText.Equals(""))
+        {
+            return await Task.FromResult(lstMenus.Where(x => x.IdMenu.ToString().ToLower().Contains(seachText.ToLower()) || x.NombreMenu.ToLower().Contains(seachText.ToLower())).ToList());
+        }
+        else
+        {
+            return await Task.FromResult(lstMenus);
+        }
     }
 
     private async Task<IEnumerable<UsuarioCls>> buscarUsuario(string seachText)

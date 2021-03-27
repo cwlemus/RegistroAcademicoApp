@@ -245,22 +245,48 @@ namespace RegistroAcademicoApp.Server.Migrations
                     b.ToTable("Maestros");
                 });
 
-            modelBuilder.Entity("RegistroAcademicoApp.Server.Models.Perfil", b =>
+            modelBuilder.Entity("RegistroAcademicoApp.Server.Models.Menu", b =>
+                {
+                    b.Property<int>("IdMenu")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Icono")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NombreMenu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OpcionMenu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdMenu");
+
+                    b.ToTable("Menu");
+                });
+
+            modelBuilder.Entity("RegistroAcademicoApp.Server.Models.Perfiles", b =>
                 {
                     b.Property<int>("IdPerfil")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("OpcionMenu")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UsuarioIdMenu")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UsuarioIdMenuNavigationIdMenu")
                         .HasColumnType("int");
 
                     b.HasKey("IdPerfil");
 
                     b.HasIndex("UsuarioId");
+
+                    b.HasIndex("UsuarioIdMenuNavigationIdMenu");
 
                     b.ToTable("Perfiles");
                 });
@@ -362,11 +388,15 @@ namespace RegistroAcademicoApp.Server.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("RegistroAcademicoApp.Server.Models.Perfil", b =>
+            modelBuilder.Entity("RegistroAcademicoApp.Server.Models.Perfiles", b =>
                 {
-                    b.HasOne("RegistroAcademicoApp.Server.Models.Usuario", "UsuarioPerfil")
+                    b.HasOne("RegistroAcademicoApp.Server.Models.Usuario", "Usuario")
                         .WithMany()
                         .HasForeignKey("UsuarioId");
+
+                    b.HasOne("RegistroAcademicoApp.Server.Models.Menu", "UsuarioIdMenuNavigation")
+                        .WithMany("Perfiles")
+                        .HasForeignKey("UsuarioIdMenuNavigationIdMenu");
                 });
 #pragma warning restore 612, 618
         }

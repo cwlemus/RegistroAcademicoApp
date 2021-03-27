@@ -26,8 +26,8 @@ namespace RegistroAcademicoApp.Server.Models
         public virtual DbSet<DetRegistroAcademico> DetRegistroAcademico { get; set; }
         public virtual DbSet<CuposCursos> CuposCurso { get; set; }
         public virtual DbSet<Usuario> Usuarios { get; set; }
-        public virtual DbSet<Perfil> Perfiles { get; set; }
-
+        public virtual DbSet<Perfiles> Perfiles { get; set; }
+        public virtual DbSet<Menu> Menu { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

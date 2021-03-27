@@ -22,13 +22,12 @@ namespace RegistroAcademicoApp.Server.Controllers
                            where perfil.IdPerfil == idPerfil
                            select new PerfilCls
                            {
-                               IdPerfil = perfil.IdPerfil,
-                               OpcionMenu = perfil.OpcionMenu,
+                               IdPerfil = perfil.IdPerfil,                               
                                UsuarioPerfil = new UsuarioCls()
                                {
-                                   idUsuario= perfil.UsuarioPerfil.idUsuario,
-                                   nombre= perfil.UsuarioPerfil.nombre,
-                                   pass= perfil.UsuarioPerfil.pass
+                                   idUsuario= perfil.Usuario.idUsuario,
+                                   nombre= perfil.Usuario.nombre,
+                                   pass= perfil.Usuario.pass
                                }
 
                            }).First();
@@ -48,25 +47,35 @@ namespace RegistroAcademicoApp.Server.Controllers
 
                 using (RegistroAcademicoContext db = new RegistroAcademicoContext())
                 {
-                    Perfil oPerfil = new Perfil();
+                    Perfiles oPerfil = new Perfiles();
                     if (pefilCls.IdPerfil == 0)
                     {
                         oPerfil.IdPerfil = pefilCls.IdPerfil;
-                        oPerfil.OpcionMenu = pefilCls.OpcionMenu;
-                        oPerfil.UsuarioPerfil = new Usuario()
+                        oPerfil.UsuarioIdMenuNavigation = new Menu()
+                        {
+                            Icono = pefilCls.UsuarioIdMenuNavigation.Icono,
+                            NombreMenu = pefilCls.UsuarioIdMenuNavigation.NombreMenu,
+                            OpcionMenu = pefilCls.UsuarioIdMenuNavigation.OpcionMenu
+                        };
+                        oPerfil.Usuario = new Usuario()
                         {
                             idUsuario = pefilCls.UsuarioPerfil.idUsuario,
                             nombre = pefilCls.UsuarioPerfil.nombre,
                             pass = pefilCls.UsuarioPerfil.pass
                         };
-                        db.Usuarios.Attach(oPerfil.UsuarioPerfil);
+                        db.Usuarios.Attach(oPerfil.Usuario);
                         db.Perfiles.Add(oPerfil);
                     }
                     else
                     {
-                        Perfil p = db.Perfiles.Where(g => g.IdPerfil == pefilCls.IdPerfil).FirstOrDefault();
-                        p.OpcionMenu = pefilCls.OpcionMenu;
-                        p.UsuarioPerfil = new Usuario()
+                        Perfiles p = db.Perfiles.Where(g => g.IdPerfil == pefilCls.IdPerfil).FirstOrDefault();
+                        p.UsuarioIdMenuNavigation = new Menu()
+                        {
+                            Icono = pefilCls.UsuarioIdMenuNavigation.Icono,
+                            NombreMenu = pefilCls.UsuarioIdMenuNavigation.NombreMenu,
+                            OpcionMenu = pefilCls.UsuarioIdMenuNavigation.OpcionMenu
+                        };
+                        p.Usuario = new Usuario()
                         {
                             idUsuario = pefilCls.UsuarioPerfil.idUsuario,
                             nombre = pefilCls.UsuarioPerfil.nombre,
@@ -100,7 +109,7 @@ namespace RegistroAcademicoApp.Server.Controllers
                 using (RegistroAcademicoContext db = new RegistroAcademicoContext())
                 {
                     int idPerfil = int.Parse(data);
-                    Perfil perfil = db.Perfiles.Where(p => p.IdPerfil == idPerfil).First();
+                    Perfiles perfil = db.Perfiles.Where(p => p.IdPerfil == idPerfil).First();
                     db.Attach(perfil);
                     db.Remove(perfil);
                     db.SaveChanges();
@@ -131,11 +140,16 @@ namespace RegistroAcademicoApp.Server.Controllers
                              select new PerfilCls
                              {
                                  IdPerfil = p.IdPerfil,
-                                 OpcionMenu = p.OpcionMenu,
-                                 UsuarioPerfil = new UsuarioCls()
+                                 UsuarioIdMenuNavigation = new MenuCls()
                                  {
-                                     idUsuario = p.UsuarioPerfil.idUsuario,
-                                     nombre = p.UsuarioPerfil.nombre
+                                     Icono = p.UsuarioIdMenuNavigation.Icono,
+                                     NombreMenu = p.UsuarioIdMenuNavigation.NombreMenu,
+                                     OpcionMenu = p.UsuarioIdMenuNavigation.OpcionMenu
+                                 },
+                    UsuarioPerfil = new UsuarioCls()
+                                 {
+                                     idUsuario = p.Usuario.idUsuario,
+                                     nombre = p.Usuario.nombre
                                  }
                              }).ToList();
                 }
@@ -143,15 +157,20 @@ namespace RegistroAcademicoApp.Server.Controllers
                 else
                 {
                     lista = (from p in db.Perfiles
-                             where p.IdPerfil.ToString().Contains(data) || p.OpcionMenu.Contains(data) 
+                             where p.IdPerfil.ToString().Contains(data) || p.UsuarioIdMenuNavigation.OpcionMenu.Contains(data) 
                              select new PerfilCls
                              {
                                  IdPerfil = p.IdPerfil,
-                                 OpcionMenu = p.OpcionMenu,
+                                 UsuarioIdMenuNavigation = new MenuCls()
+                                 {
+                                     Icono = p.UsuarioIdMenuNavigation.Icono,
+                                     NombreMenu = p.UsuarioIdMenuNavigation.NombreMenu,
+                                     OpcionMenu = p.UsuarioIdMenuNavigation.OpcionMenu
+                                 },
                                  UsuarioPerfil = new UsuarioCls()
                                  {
-                                     idUsuario = p.UsuarioPerfil.idUsuario,
-                                     nombre = p.UsuarioPerfil.nombre
+                                     idUsuario = p.Usuario.idUsuario,
+                                     nombre = p.Usuario.nombre
                                  }
                              }).ToList();
 
@@ -173,11 +192,16 @@ namespace RegistroAcademicoApp.Server.Controllers
                          select new PerfilCls
                          {
                              IdPerfil = p.IdPerfil,
-                              OpcionMenu = p.OpcionMenu,
+                             UsuarioIdMenuNavigation = new MenuCls()
+                             {
+                                 Icono = p.UsuarioIdMenuNavigation.Icono,
+                                 NombreMenu = p.UsuarioIdMenuNavigation.NombreMenu,
+                                 OpcionMenu = p.UsuarioIdMenuNavigation.OpcionMenu
+                             },
                              UsuarioPerfil = new UsuarioCls()
                              {
-                                 idUsuario= p.UsuarioPerfil.idUsuario,
-                                 nombre= p.UsuarioPerfil.nombre
+                                 idUsuario= p.Usuario.idUsuario,
+                                 nombre= p.Usuario.nombre
                              }
                          }).ToList();
             }

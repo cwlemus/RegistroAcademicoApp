@@ -1,25 +1,30 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace RegistroAcademicoApp.Server.Migrations
 {
-    public partial class addAutorizacion : Migration
+    public partial class perfilesUsuario : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-          
+           
+
             migrationBuilder.CreateTable(
-                name: "Usuarios",
+                name: "Menu",
                 columns: table => new
                 {
-                    idUsuario = table.Column<int>(nullable: false)
+                    IdMenu = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    nombre = table.Column<string>(nullable: true),
-                    pass = table.Column<string>(nullable: true)
+                    OpcionMenu = table.Column<string>(nullable: true),
+                    NombreMenu = table.Column<string>(nullable: true),
+                    Icono = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Usuarios", x => x.idUsuario);
+                    table.PrimaryKey("PK_Menu", x => x.IdMenu);
                 });
+
+
 
             migrationBuilder.CreateTable(
                 name: "Perfiles",
@@ -27,8 +32,9 @@ namespace RegistroAcademicoApp.Server.Migrations
                 {
                     IdPerfil = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    OpcionMenu = table.Column<string>(nullable: true),
-                    UsuarioId = table.Column<int>(nullable: true)
+                    UsuarioIdMenu = table.Column<int>(nullable: true),
+                    UsuarioId = table.Column<int>(nullable: true),
+                   
                 },
                 constraints: table =>
                 {
@@ -39,25 +45,32 @@ namespace RegistroAcademicoApp.Server.Migrations
                         principalTable: "Usuarios",
                         principalColumn: "idUsuario",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Perfiles_Menu_UsuarioIdMenu",
+                        column: x => x.UsuarioIdMenu,
+                        principalTable: "Menu",
+                        principalColumn: "IdMenu",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
-           
-            migrationBuilder.CreateIndex(
-                name: "IX_Perfiles_UsuarioId",
-                table: "Perfiles",
-                column: "UsuarioId");
+            
 
+
+            migrationBuilder.CreateIndex(
+                name: "FK_Perfiles_Menu_UsuarioIdMenu",
+                table: "Perfiles",
+                column: "UsuarioIdMenu");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
-        {           
+        {
+           
+
+            migrationBuilder.DropTable(
+                name: "Menu");
 
             migrationBuilder.DropTable(
                 name: "Perfiles");
-
-            migrationBuilder.DropTable(
-                name: "Usuarios");
-            
 
         }
     }

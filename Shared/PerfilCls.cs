@@ -8,11 +8,12 @@ namespace RegistroAcademicoApp.Shared
 {
     public class PerfilCls
     {
-        public int IdPerfil { get; set; }
-        public string OpcionMenu { get; set; }
+        public int IdPerfil { get; set; }   
 
         public int? UsuarioId { get; set; }
+        public int? UsuarioIdMenu { get; set; }
 
         public virtual UsuarioCls UsuarioPerfil { get; set; }
+        public virtual MenuCls UsuarioIdMenuNavigation { get; set; }
     }
 }
