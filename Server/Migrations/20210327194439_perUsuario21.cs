@@ -3,12 +3,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace RegistroAcademicoApp.Server.Migrations
 {
-    public partial class perfilesUsuario : Migration
+    public partial class perUsuario21 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
            
-
             migrationBuilder.CreateTable(
                 name: "Menu",
                 columns: table => new
@@ -24,7 +23,7 @@ namespace RegistroAcademicoApp.Server.Migrations
                     table.PrimaryKey("PK_Menu", x => x.IdMenu);
                 });
 
-
+        
 
             migrationBuilder.CreateTable(
                 name: "Perfiles",
@@ -34,7 +33,7 @@ namespace RegistroAcademicoApp.Server.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UsuarioIdMenu = table.Column<int>(nullable: true),
                     UsuarioId = table.Column<int>(nullable: true),
-                   
+                    UsuarioIdMenuNavigationIdMenu = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -46,20 +45,26 @@ namespace RegistroAcademicoApp.Server.Migrations
                         principalColumn: "idUsuario",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Perfiles_Menu_UsuarioIdMenu",
-                        column: x => x.UsuarioIdMenu,
+                        name: "FK_Perfiles_Menu_UsuarioIdMenuNavigationIdMenu",
+                        column: x => x.UsuarioIdMenuNavigationIdMenu,
                         principalTable: "Menu",
                         principalColumn: "IdMenu",
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            
+           
+
 
 
             migrationBuilder.CreateIndex(
-                name: "FK_Perfiles_Menu_UsuarioIdMenu",
+                name: "IX_Perfiles_UsuarioId",
                 table: "Perfiles",
-                column: "UsuarioIdMenu");
+                column: "UsuarioId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Perfiles_UsuarioIdMenuNavigationIdMenu",
+                table: "Perfiles",
+                column: "UsuarioIdMenuNavigationIdMenu");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -67,11 +72,14 @@ namespace RegistroAcademicoApp.Server.Migrations
            
 
             migrationBuilder.DropTable(
-                name: "Menu");
-
-            migrationBuilder.DropTable(
                 name: "Perfiles");
 
+          
+
+            migrationBuilder.DropTable(
+                name: "Menu");
+
+         
         }
     }
 }

@@ -1,0 +1,54 @@
+﻿@page "/Registro"
+@using RegistroAcademicoApp.Shared
+@inject HttpClient http
+@inject IRepositorio repositorio
+@inject NavigationManager navigationManager
+
+<EditForm Model="@usuarioCls" OnValidSubmit="GuardarDatos">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="@tipoMsg">
+        @msg
+    </div>
+    <div class="form-group">
+        <label>Ingrese Nombre de Usuario</label>
+        <InputText class="form-check form-control"
+                   @bind-Value="usuarioCls.nombre" />
+    </div>
+
+    <div class="form-group">
+        <label>Ingrese Seccion de Grado</label>
+        <InputText type="password" class="form form-control"
+                   @bind-Value="usuarioCls.pass" />
+    </div>
+    <input type="submit" value="Guardar" class="btn btn-primary btn-block" />
+
+</EditForm>
+
+
+@code {    
+    public UsuarioCls usuarioCls { get; set; } = new UsuarioCls();
+    private string tipoMsg = "", msg = "", message = "";
+    public async Task GuardarDatos()
+    {
+
+        var response = await repositorio.Post("api/Usuario/Registrar", usuarioCls);
+        if (response.Error)
+        {
+            var body = await response.HttpResponseMessage.Content.ReadAsStringAsync();
+            Console.WriteLine(body);
+            tipoMsg = "alert alert-danger";
+            msg = "Accion no pudo procesarse";
+        }
+        else
+        {
+            tipoMsg = "alert alert-primary";
+            msg = "usuario registrado con exito";
+        }
+
+    }
+
+
+
+
+}

@@ -1,4 +1,7 @@
-﻿<div class="top-row pl-4 navbar navbar-dark">
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using RegistroAcademicoApp.Shared;
+@inject HttpClient http;
+<div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">RegistroAcademicoApp</a>
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
         <span class="navbar-toggler-icon"></span>
@@ -7,38 +10,59 @@
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <ul class="nav flex-column">
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="registroCurso">
-                <span class="oi oi-plus" aria-hidden="true"></span> Registro Academico
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="ListaGrados">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Lista Grados
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="ListaPerfil">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Lista Perfiles
-            </NavLink>
-        </li>
+      
+        @if (lstMenuUsuario != null)
+        {
+            @foreach (var menu in lstMenuUsuario)
+            {
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="@menu.OpcionMenu">
+                        <span class="@menu.Icono" aria-hidden="true"></span> @menu.NombreMenu
+                    </NavLink>
+                </li>
+            }
+            }
+            else
+            {
+                <h3 style="color:red">No cuenta con opciones asignadas</h3>
+            }
     </ul>
 </div>
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState> auth { get; set; }
+    public MenuCls[] lstMenuUsuario;
+
     private bool collapseNavMenu = true;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var authuser = await auth;
+
+        var user = authuser.User;
+
+
+
+        if (user.Identity.IsAuthenticated)
+        {
+            //message = "Bienvenido " + user.Identity.Name;
+            string nombreUsuario = user.Identity.Name;
+            lstMenuUsuario = await http.GetFromJsonAsync<MenuCls[]>("api/Perfil/GetPerfiles/" + nombreUsuario);
+        }
+        else
+        {
+            //message = "No esta autenticado";
+        }
+    }
+
+    /*
+
+
+    */
 
     private void ToggleNavMenu()
     {

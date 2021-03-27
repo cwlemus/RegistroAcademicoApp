@@ -4,6 +4,8 @@ using RegistroAcademicoApp.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace RegistroAcademicoApp.Server.Controllers
@@ -12,6 +14,35 @@ namespace RegistroAcademicoApp.Server.Controllers
   
     public class UsuarioController : Controller
     {
+
+        [HttpPost]
+        [Route("api/Usuario/Registrar")]
+        public ActionResult Registrar([FromBody] UsuarioCls oUsuario)
+        {
+
+            using (RegistroAcademicoContext db = new RegistroAcademicoContext())
+            {
+                Usuario usuario = new Usuario()
+                {
+                    idUsuario = oUsuario.idUsuario,
+                    nombre = oUsuario.nombre,
+                    pass = oUsuario.pass
+                };
+
+                SHA256Managed sha = new SHA256Managed();
+                byte[] buffer = Encoding.Default.GetBytes(oUsuario.pass);
+                byte[] dataCifrada = sha.ComputeHash(buffer);
+                string dataCifradaCadena = BitConverter.ToString(dataCifrada).Replace("-", "");
+                usuario.pass = dataCifradaCadena; 
+
+                db.Usuarios.Add(usuario);
+                db.SaveChanges();
+            }
+
+            return Ok();
+        }
+
+
         [HttpPost]
         [Route("api/Usuario/login")]
         public int login([FromBody] UsuarioCls oUsuario)
@@ -22,20 +53,20 @@ namespace RegistroAcademicoApp.Server.Controllers
                 using (RegistroAcademicoContext cn = new RegistroAcademicoContext())
                 {
                     string clave = oUsuario.pass;
-                    /* SHA256Managed sha = new SHA256Managed();
-                     byte[] buffer = Encoding.Default.GetBytes(clave);
-                     byte[] dataCifrada = sha.ComputeHash(buffer);
-                     string dataCifradaCadena = BitConverter.ToString(dataCifrada);*/
+                    SHA256Managed sha = new SHA256Managed();
+                    byte[] buffer = Encoding.Default.GetBytes(oUsuario.pass);
+                    byte[] dataCifrada = sha.ComputeHash(buffer);
+                    string dataCifradaCadena = BitConverter.ToString(dataCifrada).Replace("-", "");
 
 
-                    int nveces = cn.Usuarios.Where(p => p.nombre == oUsuario.nombre && p.pass == oUsuario.pass).Count();
+                    int nveces = cn.Usuarios.Where(p => p.nombre == oUsuario.nombre && p.pass == dataCifradaCadena).Count();
                     if (nveces == 0)
                     {
                         rpta = 0;
                     }
                     else
                     {
-                        rpta = cn.Usuarios.Where(p => p.nombre == oUsuario.nombre && p.pass == oUsuario.pass).First().idUsuario;
+                        rpta = cn.Usuarios.Where(p => p.nombre == oUsuario.nombre && p.pass == dataCifradaCadena).First().idUsuario;
                     }
                 }
             }

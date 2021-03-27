@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RegistroAcademicoApp.Server.Models;
 using RegistroAcademicoApp.Shared;
 using System;
@@ -7,7 +8,42 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace RegistroAcademicoApp.Server.Controllers
-{
+{   
+    
+
+    [ApiController]
+    public class PerfilController : Controller
+    {
+        [HttpGet]
+        [Route("api/Perfil/GetPerfiles/{nombreUsuario}")]
+        public List<MenuCls> GetPerfiles(string nombreUsuario)
+        {
+            List<MenuCls> lstMenu = new List<MenuCls>();
+            using (RegistroAcademicoContext db = new RegistroAcademicoContext())
+            {
+                var listaSegunPerfil = db.Perfiles.Include(p => p.UsuarioIdMenuNavigation).Include(p => p.Usuario).Where(p => p.Usuario.nombre == nombreUsuario).ToList();
+
+                if (listaSegunPerfil != null)
+                {
+                    foreach (var op in listaSegunPerfil)
+                    {
+                        MenuCls menu = new MenuCls()
+                        {
+                            IdMenu = op.UsuarioIdMenuNavigation.IdMenu,
+                            OpcionMenu = op.UsuarioIdMenuNavigation.OpcionMenu,
+                            NombreMenu = op.UsuarioIdMenuNavigation.NombreMenu,
+                            Icono = op.UsuarioIdMenuNavigation.Icono
+                        };
+                        lstMenu.Add(menu);
+                    }
+                }
+            }
+            return lstMenu;
+        }
+    }
+
+
+    /*
     [ApiController]
     public class PerfilController : Controller
     {
@@ -188,11 +224,13 @@ namespace RegistroAcademicoApp.Server.Controllers
             List<PerfilCls> lista = new List<PerfilCls>();
             using (RegistroAcademicoContext db = new RegistroAcademicoContext())
             {
-                lista = (from p in db.Perfiles
+
+                var lstA = db.Perfiles.ToList(); 
+                   lista = (from p in db.Perfiles.Include(per=>per.Usuario).Include(m=>m.UsuarioIdMenuNavigation)
                          select new PerfilCls
                          {
                              IdPerfil = p.IdPerfil,
-                             UsuarioIdMenuNavigation = new MenuCls()
+                            UsuarioIdMenuNavigation = new MenuCls()
                              {
                                  Icono = p.UsuarioIdMenuNavigation.Icono,
                                  NombreMenu = p.UsuarioIdMenuNavigation.NombreMenu,
@@ -209,5 +247,5 @@ namespace RegistroAcademicoApp.Server.Controllers
 
         }
 
-    }
+    }*/
 }
