@@ -1,0 +1,144 @@
+﻿@page "/reporteMaestros"
+@using OfficeOpenXml;
+@using OfficeOpenXml.Style;
+@using System.IO;
+@using iText.Kernel.Pdf;
+@using iText.Layout;
+@using iText.Layout.Element;
+@using iText.Kernel.Colors;
+@using iText.Layout.Properties;
+@using RegistroAcademicoApp.Shared;
+@inject HttpClient http
+@inject IJSRuntime jsruntime;
+
+<h3>Reporte de Cursos segun maestros</h3>
+
+<div class="form-group">
+    <label>Docente</label>
+    <select class="form-control" @bind-value="cbxMaestro"
+            @bind-value:event="oninput"
+            @onchange="BuscarCursoPorMaestro">
+        <option value="">--Seleccione--</option>
+        @if (LstMaestros != null)
+        {
+            @foreach (MaestrosCls m in LstMaestros)
+            {
+                <option value="@m.MaestroId">@m.Nombre</option>
+            }
+        }
+    </select>
+    
+    <button @onclick="GenerarReporte" class="btn btn-info btn-block">Reporte de Maestros y cursos</button>
+</div>
+
+
+@code {
+
+    private int cbxMaestro;
+    public MaestrosCls[] LstMaestros { get; set; } = null;
+    public List<CursoCls> LstCursos { get; set; } = null;
+    MaestrosCls maestroSelected = new MaestrosCls();
+    string[] cabecerasReporte = { "#", "Curso" };
+    string pdf = "";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        LstMaestros = await http.GetFromJsonAsync<MaestrosCls[]>("api/Maestro/GetMaestros");
+    }
+
+    private List<MaestroModuloCls> GetCursos()
+    {
+        List<MaestroModuloCls> lst = new List<MaestroModuloCls>();
+        int correlativo = 0;
+        foreach (CursoCls curso in LstCursos)
+        {
+            correlativo++;
+            MaestroModuloCls mm = new MaestroModuloCls()
+            {
+                Corr = correlativo,
+                NombreCurso = curso.NombreCurso
+            };
+            lst.Add(mm);
+        }
+        return lst;
+    }
+
+    //Metodo para exportar en pdf
+    public void GenerarReporte()
+    {
+        using (MemoryStream ms = new MemoryStream())
+        {
+            PdfWriter writer = new PdfWriter(ms);
+            using (var pdfDoc = new PdfDocument(writer))
+            {
+                //obtener el maestro
+                string nombre = LstMaestros.Where(m => m.MaestroId == cbxMaestro).Select(s => s.Nombre).First();
+
+                //Llenado
+                Document doc = new Document(pdfDoc);
+                Paragraph p1 = new Paragraph("Reporte del maestro "+nombre+" y sus cursos");
+                p1.SetTextAlignment(TextAlignment.CENTER);
+                p1.SetFontSize(20);
+                doc.Add(p1);
+
+                /*float[] columnWidths = { 10, 50 };
+                Table table = new Table(UnitValue.CreatePercentArray(columnWidths));
+                */
+                Table table = new Table(cabecerasReporte.Length).UseAllAvailableWidth();
+
+                Cell celda;
+
+                //encabezado
+                for (int i = 0; i < cabecerasReporte.Length; i++)
+                {
+                    celda = new Cell(1, i);
+                    celda.SetBackgroundColor(ColorConstants.LIGHT_GRAY);
+                    celda.SetTextAlignment(TextAlignment.CENTER);
+                    celda.Add(new Paragraph(cabecerasReporte[i]));
+                    table.AddHeaderCell(celda);
+                }
+                //se llena la lista
+                List<MaestroModuloCls> lista = GetCursos();
+
+                //Construir contenido
+                foreach (object item in lista)
+                {
+                    for (int i = 0; i < cabecerasReporte.Length; i++)
+                    {
+                        celda = new Cell(1, i);
+                        celda.SetTextAlignment(TextAlignment.CENTER);
+                        celda.Add(new Paragraph(item.GetType().GetProperties()[i].GetValue(item).ToString()));
+                        table.AddCell(celda);
+                    }
+                }
+                doc.Add(table);
+
+                //cerrado
+                doc.Close();
+                writer.Close();
+                byte[] buffer = ms.ToArray();
+                string base64 = Convert.ToBase64String(buffer);
+
+                //descargar
+                pdf = "data:application/octet-stream;base64," + base64;
+                jsruntime.InvokeVoidAsync("descargarPDF", pdf);
+            }
+        }
+    }
+
+    public void BuscarCursoPorMaestro()
+    {
+        LstCursos = null;
+        maestroSelected = LstMaestros.Where(c => c.MaestroId == cbxMaestro).First();
+        //LstCursos = maestroSelected.CursosPresencialMaestros;
+        LstCursos = (from c in maestroSelected.CursosPresencialMaestros
+                     select new CursoCls()
+                     {
+                         CursoId = c.CursoId,
+                         Descripcion = c.Descripcion,
+                         Cupo = c.CuposCurso.Where(s => s.Year == DateTime.Now.Year).Select(c => c.Cupo).First(),
+                         NombreCurso = c.NombreCurso
+                     }).ToList();
+    }
+}
