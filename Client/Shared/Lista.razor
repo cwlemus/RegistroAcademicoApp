@@ -1,4 +1,13 @@
-﻿
+﻿@using OfficeOpenXml;
+@using OfficeOpenXml.Style;
+@using System.IO;
+@using iText.Kernel.Pdf;
+@using iText.Layout;
+@using iText.Layout.Element;
+@using iText.Kernel.Colors;
+@using iText.Layout.Properties;
+
+@inject IJSRuntime jsruntime;
 @inject NavigationManager navManager
 
 @if (lista == null)
@@ -11,15 +20,28 @@
 else
 {
 
+    <div class="form-group">
+        @if (AgregarOpt)
+        {
 
-    @if (AgregarOpt)
-    {
-        <div class="form-group">
             <NavLink href="@rtaAgregar">
                 <button class="btn btn-primary">Agregar</button>
             </NavLink>
-        </div>
-    }
+
+        }
+        @if (permitirReporteExcel)
+        {
+            <a @onclick="exportarExcel"
+               class="btn btn-secondary"
+               href="@excel">Exportar Excel</a>
+        }
+        @if (permitirReportePdf)
+        {
+            <button @onclick="exportarPdf" class="btn btn-info">
+                Exportar PDF
+            </button>
+        }
+    </div>
     <div class="mb-4">
         <label class="form-group">Buscar</label>
         <input type="text" class="form-check form-control"
@@ -73,9 +95,20 @@ else
 
     public string valorEliminar { get; set; }
     public string valorEditar { get; set; }
+    public string excel = "";
+    public string pdf { get; set; }
+
 
     [Parameter]
     public bool MostrarEspera { get; set; }
+    [Parameter]
+    public string[] cabecerasReporte { get; set; }
+    [Parameter]
+    public bool permitirReporteExcel { get; set; } = false;
+    [Parameter]
+    public bool permitirReportePdf { get; set; } = false;
+    [Parameter]
+    public string tituloPdf { get; set; }
 
     [Parameter]
     public String rtaAgregar { get; set; } = " ";
@@ -105,6 +138,107 @@ else
 
     [Parameter]
     public EventCallback<string> eventEditar { get; set; }
+
+
+    //Metodo para exportar en pdf
+    public void exportarPdf()
+    {
+        using (MemoryStream ms = new MemoryStream())
+        {
+            PdfWriter writer = new PdfWriter(ms);
+            using (var pdfDoc = new PdfDocument(writer))
+            {
+                //Llenado
+                Document doc = new Document(pdfDoc);
+                Paragraph p1 = new Paragraph(tituloPdf);
+                p1.SetTextAlignment(TextAlignment.CENTER);
+                p1.SetFontSize(20);
+                doc.Add(p1);
+
+                float[] columnWidths = { 1, 10, 10 };
+                Table table = new Table(UnitValue.CreatePercentArray(columnWidths));
+
+                Cell celda;
+
+                //encabezado
+                for (int i = 0; i < cabecerasReporte.Length; i++)
+                {
+                    celda = new Cell(1, i);
+                    celda.SetBackgroundColor(ColorConstants.LIGHT_GRAY);
+                    celda.SetTextAlignment(TextAlignment.CENTER);
+                    celda.Add(new Paragraph(cabecerasReporte[i]));
+                    table.AddHeaderCell(celda);
+                }
+
+                //Construir contenido
+                foreach (object item in lista)
+                {
+                    for (int i = 0; i < cabecerasReporte.Length; i++)
+                    {
+                        celda = new Cell(1, i);
+                        celda.SetTextAlignment(TextAlignment.CENTER);
+                        celda.Add(new Paragraph(item.GetType().GetProperties()[i].GetValue(item).ToString()));
+                        table.AddCell(celda);
+                    }
+                }
+                doc.Add(table);
+
+                //cerrado
+                doc.Close();
+                writer.Close();
+                byte[] buffer = ms.ToArray();
+                string base64 = Convert.ToBase64String(buffer);
+
+                //descargar
+                pdf = "data:application/octet-stream;base64," + base64;
+                jsruntime.InvokeVoidAsync("descargarPDF", pdf);
+            }
+        }
+    }
+
+    //Metodo para generar excel
+    public void exportarExcel()
+    {
+        using (MemoryStream ms = new MemoryStream())
+        {
+            using (ExcelPackage ep = new ExcelPackage())
+            {
+                ep.Workbook.Worksheets.Add("Hoja");
+                ExcelWorksheet ew = ep.Workbook.Worksheets[0];
+
+                //realizando encabezado de columnas de titulo
+                for (int i = 0; i < cabecerasReporte.Length; i++)
+                {
+                    ew.Column(i + 1).Width = 50;
+                    ew.Cells[1, i + 1].Value = cabeceras[i];
+                }
+
+                //iniciando valores
+                int fila = 2;
+                int col = 1;
+
+                //colocar la informacion que tenemos disponible para generar el documento xls
+                foreach (object item in lista)
+                {
+                    col = 1;
+                    for (int i = 0; i < cabecerasReporte.Length; i++)
+                    {
+                        ew.Cells[fila, col].Value = item.GetType().GetProperties()[i].GetValue(item).ToString();
+                        col++;
+                    }
+                    fila++;
+                }
+
+                //realizar la descarga.
+                ep.SaveAs(ms);
+                byte[] buffer = ms.ToArray();
+                string base64 = Convert.ToBase64String(buffer);
+                excel = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," + base64;
+            }
+        }
+    }
+
+
 
     public void OptEliminar(String data)
     {

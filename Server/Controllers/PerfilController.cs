@@ -21,7 +21,8 @@ namespace RegistroAcademicoApp.Server.Controllers
             List<MenuCls> lstMenu = new List<MenuCls>();
             using (RegistroAcademicoContext db = new RegistroAcademicoContext())
             {
-                var listaSegunPerfil = db.Perfiles.Include(p => p.UsuarioIdMenuNavigation).Include(p => p.Usuario).Where(p => p.Usuario.nombre == nombreUsuario).ToList();
+                var listaSegunPerfil = db.Perfiles.Include(p => p.UsuarioIdMenuNavigation).
+                    Include(p => p.Usuario).Where(p => p.Usuario.nombre == nombreUsuario).ToList();
 
                 if (listaSegunPerfil != null)
                 {

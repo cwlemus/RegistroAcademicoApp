@@ -6,6 +6,7 @@
     <Authorized>
         <h3 style="color: cornflowerblue">@message</h3>
         @code{
+            string[] cabeceraReporte = { "Codigo", "Grado", "Seccion"};
             string[] cabecerasTabla = { "Codigo", "Grado", "Seccion", "Opciones" };
         }
         <div class="@tipoMsg">
@@ -19,7 +20,12 @@
                rtaEditar="editarGrado"
                EditarOpt="true"
                AgregarOpt="true"
-               MostrarEspera="true" />
+               MostrarEspera="true"
+               cabecerasReporte=cabeceraReporte
+               permitirReporteExcel="true"
+               permitirReportePdf="true"
+               tituloPdf="Reporte de Grados"
+               />
     </Authorized>
     <NotAuthorized>
         <h3 style="color:red">@message</h3>
