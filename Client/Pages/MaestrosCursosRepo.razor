@@ -67,62 +67,65 @@
     //Metodo para exportar en pdf
     public void GenerarReporte()
     {
-        using (MemoryStream ms = new MemoryStream())
+        if (LstCursos != null)
         {
-            PdfWriter writer = new PdfWriter(ms);
-            using (var pdfDoc = new PdfDocument(writer))
+            using (MemoryStream ms = new MemoryStream())
             {
-                //obtener el maestro
-                string nombre = LstMaestros.Where(m => m.MaestroId == cbxMaestro).Select(s => s.Nombre).First();
-
-                //Llenado
-                Document doc = new Document(pdfDoc);
-                Paragraph p1 = new Paragraph("Reporte del maestro "+nombre+" y sus cursos");
-                p1.SetTextAlignment(TextAlignment.CENTER);
-                p1.SetFontSize(20);
-                doc.Add(p1);
-
-                /*float[] columnWidths = { 10, 50 };
-                Table table = new Table(UnitValue.CreatePercentArray(columnWidths));
-                */
-                Table table = new Table(cabecerasReporte.Length).UseAllAvailableWidth();
-
-                Cell celda;
-
-                //encabezado
-                for (int i = 0; i < cabecerasReporte.Length; i++)
+                PdfWriter writer = new PdfWriter(ms);
+                using (var pdfDoc = new PdfDocument(writer))
                 {
-                    celda = new Cell(1, i);
-                    celda.SetBackgroundColor(ColorConstants.LIGHT_GRAY);
-                    celda.SetTextAlignment(TextAlignment.CENTER);
-                    celda.Add(new Paragraph(cabecerasReporte[i]));
-                    table.AddHeaderCell(celda);
-                }
-                //se llena la lista
-                List<MaestroModuloCls> lista = GetCursos();
+                    //obtener el maestro
+                    string nombre = LstMaestros.Where(m => m.MaestroId == cbxMaestro).Select(s => s.Nombre).First();
 
-                //Construir contenido
-                foreach (object item in lista)
-                {
+                    //Llenado
+                    Document doc = new Document(pdfDoc);
+                    Paragraph p1 = new Paragraph("Reporte del maestro " + nombre + " y sus cursos");
+                    p1.SetTextAlignment(TextAlignment.CENTER);
+                    p1.SetFontSize(20);
+                    doc.Add(p1);
+
+                    /*float[] columnWidths = { 10, 50 };
+                    Table table = new Table(UnitValue.CreatePercentArray(columnWidths));
+                    */
+                    Table table = new Table(cabecerasReporte.Length).UseAllAvailableWidth();
+
+                    Cell celda;
+
+                    //encabezado
                     for (int i = 0; i < cabecerasReporte.Length; i++)
                     {
                         celda = new Cell(1, i);
+                        celda.SetBackgroundColor(ColorConstants.LIGHT_GRAY);
                         celda.SetTextAlignment(TextAlignment.CENTER);
-                        celda.Add(new Paragraph(item.GetType().GetProperties()[i].GetValue(item).ToString()));
-                        table.AddCell(celda);
+                        celda.Add(new Paragraph(cabecerasReporte[i]));
+                        table.AddHeaderCell(celda);
                     }
+                    //se llena la lista
+                    List<MaestroModuloCls> lista = GetCursos();
+
+                    //Construir contenido
+                    foreach (object item in lista)
+                    {
+                        for (int i = 0; i < cabecerasReporte.Length; i++)
+                        {
+                            celda = new Cell(1, i);
+                            celda.SetTextAlignment(TextAlignment.CENTER);
+                            celda.Add(new Paragraph(item.GetType().GetProperties()[i].GetValue(item).ToString()));
+                            table.AddCell(celda);
+                        }
+                    }
+                    doc.Add(table);
+
+                    //cerrado
+                    doc.Close();
+                    writer.Close();
+                    byte[] buffer = ms.ToArray();
+                    string base64 = Convert.ToBase64String(buffer);
+
+                    //descargar
+                    pdf = "data:application/octet-stream;base64," + base64;
+                    jsruntime.InvokeVoidAsync("descargarPDF", pdf);
                 }
-                doc.Add(table);
-
-                //cerrado
-                doc.Close();
-                writer.Close();
-                byte[] buffer = ms.ToArray();
-                string base64 = Convert.ToBase64String(buffer);
-
-                //descargar
-                pdf = "data:application/octet-stream;base64," + base64;
-                jsruntime.InvokeVoidAsync("descargarPDF", pdf);
             }
         }
     }
